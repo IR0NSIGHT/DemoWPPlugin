@@ -1,5 +1,6 @@
 package org.demo.wpplugin.pathing;
 
+import org.demo.wpplugin.operations.River.RiverHandleInformation;
 import org.junit.jupiter.api.Test;
 
 import java.awt.*;
@@ -8,7 +9,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 
 import static org.demo.wpplugin.operations.River.RiverHandleInformation.*;
-import static org.demo.wpplugin.operations.River.RiverHandleInformation.RiverInformation.RIVER_RADIUS;
+import static org.demo.wpplugin.operations.River.RiverHandleInformation.RiverInformation.*;
 import static org.demo.wpplugin.pathing.PointInterpreter.PointType.RIVER_2D;
 import static org.demo.wpplugin.pathing.PointUtils.getPoint2D;
 import static org.demo.wpplugin.pathing.PointUtils.setPosition2D;
@@ -25,6 +26,9 @@ class PathTest {
             float[] newHandle = new float[type.size];
             newHandle[0] = 3 * i;
             newHandle[1] = 4 * i;
+            for (int n = 2; n < type.size; n++) {
+                newHandle[n] = 27;
+            }
             p = p.addPoint(newHandle.clone());
         }
         return p;
@@ -46,7 +50,7 @@ class PathTest {
         assertEquals(p, clone);
 
         float[] newHandle = someHandle.clone();
-        newHandle = setValue(newHandle, RIVER_RADIUS, 127);
+        newHandle = setValue(newHandle, RIVER_RADIUS, getValue(newHandle, RIVER_RADIUS) + 1);
         assertNotSame(newHandle, someHandle);
         p = p.setHandleByIdx(newHandle, idx);
         assertArrayEquals(p.handleByIndex(idx), newHandle);
@@ -228,6 +232,71 @@ class PathTest {
         }
         for (float[] point : curve) {
             System.out.println("#".repeat(Math.round(getValue(point, RIVER_RADIUS))));
+        }
+
+
+        {
+            //Test if interpolating of INHERT handles works for edge cases
+            //allow only setting one or more values and propagate to the other handles
+            {
+                //only first value is set
+                p = new Path(Collections.EMPTY_LIST, PointInterpreter.PointType.RIVER_2D);
+                p = p.addPoint(RiverHandleInformation.riverInformation(10, 10, 5, 6, 7, 30));
+                p = p.addPoint(RiverHandleInformation.riverInformation(11, 10));
+
+                p = p.addPoint(RiverHandleInformation.riverInformation(20, 30));
+                p = p.addPoint(RiverHandleInformation.riverInformation(21, 30));
+
+                curve = p.continousCurve();
+                for (float[] a : curve) {
+                    assertEquals(5, getValue(a, RIVER_RADIUS), 0.01f);
+                    assertEquals(6, getValue(a, RIVER_DEPTH), 0.01f);
+                    assertEquals(7, getValue(a, BEACH_RADIUS), 0.01f);
+                    assertEquals(30, getValue(a, TRANSITION_RADIUS), 0.01f);
+                }
+            }
+
+            {
+                //only last value is set
+                ArrayList<float[]> handles = new ArrayList<>();
+
+                handles.add(RiverHandleInformation.riverInformation(10, 10));
+                handles.add(RiverHandleInformation.riverInformation(11, 10));
+
+                handles.add(RiverHandleInformation.riverInformation(20, 30));
+                handles.add(RiverHandleInformation.riverInformation(21, 30, 5, 6, 7, 30));
+
+                p = new Path(handles, PointInterpreter.PointType.RIVER_2D);
+
+                curve = p.continousCurve();
+                for (float[] a : curve) {
+                    assertEquals(5, getValue(a, RIVER_RADIUS), 0.01f);
+                    assertEquals(6, getValue(a, RIVER_DEPTH), 0.01f);
+                    assertEquals(7, getValue(a, BEACH_RADIUS), 0.01f);
+                    assertEquals(30, getValue(a, TRANSITION_RADIUS), 0.01f);
+                }
+            }
+
+            {
+                //only one value anywhere is set
+                ArrayList<float[]> handles = new ArrayList<>();
+
+                handles.add(RiverHandleInformation.riverInformation(10, 10));
+                handles.add(RiverHandleInformation.riverInformation(11, 10));
+                handles.add(RiverHandleInformation.riverInformation(100, 200));
+                handles.add(RiverHandleInformation.riverInformation(20, 30, 5, 6, 7, 30));
+                handles.add(RiverHandleInformation.riverInformation(21, 30));
+
+                p = new Path(handles, PointInterpreter.PointType.RIVER_2D);
+
+                curve = p.continousCurve();
+                for (float[] a : curve) {
+                    assertEquals(5, getValue(a, RIVER_RADIUS), 0.01f);
+                    assertEquals(6, getValue(a, RIVER_DEPTH), 0.01f);
+                    assertEquals(7, getValue(a, BEACH_RADIUS), 0.01f);
+                    assertEquals(30, getValue(a, TRANSITION_RADIUS), 0.01f);
+                }
+            }
         }
     }
 
