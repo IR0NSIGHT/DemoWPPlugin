@@ -242,7 +242,7 @@ class PathTest {
             {
                 //only first value is set
                 p = new Path(Collections.EMPTY_LIST, PointInterpreter.PointType.RIVER_2D);
-                p = p.addPoint(RiverHandleInformation.riverInformation(10, 10, 5, 6, 7, 30));
+                p = p.addPoint(RiverHandleInformation.riverInformation(10, 10, 5, 6, 7, 30,10));
                 p = p.addPoint(RiverHandleInformation.riverInformation(11, 10));
 
                 p = p.addPoint(RiverHandleInformation.riverInformation(20, 30));
@@ -265,7 +265,7 @@ class PathTest {
                 handles.add(RiverHandleInformation.riverInformation(11, 10));
 
                 handles.add(RiverHandleInformation.riverInformation(20, 30));
-                handles.add(RiverHandleInformation.riverInformation(21, 30, 5, 6, 7, 30));
+                handles.add(RiverHandleInformation.riverInformation(21, 30, 5, 6, 7, 30,10));
 
                 p = new Path(handles, PointInterpreter.PointType.RIVER_2D);
 
@@ -285,7 +285,7 @@ class PathTest {
                 handles.add(RiverHandleInformation.riverInformation(10, 10));
                 handles.add(RiverHandleInformation.riverInformation(11, 10));
                 handles.add(RiverHandleInformation.riverInformation(100, 200));
-                handles.add(RiverHandleInformation.riverInformation(20, 30, 5, 6, 7, 30));
+                handles.add(RiverHandleInformation.riverInformation(20, 30, 5, 6, 7, 30,10));
                 handles.add(RiverHandleInformation.riverInformation(21, 30));
 
                 p = new Path(handles, PointInterpreter.PointType.RIVER_2D);
